@@ -1,6 +1,7 @@
 package com.company;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Main {
@@ -12,12 +13,14 @@ public class Main {
         int N_start = (12500 / 50 * (V-1))/coef;
         String dir_path = "F:/Repository/parallel_computing/datasets/aclImdb/test/neg/";
 
+        LinkedList<String> stop_words = read_stop_words("stop_words.txt");
+
         String temp_dir_path = dir_path;
         for (int j = 0; j < 2; j++) {
             for (int n = 0; n < 2; n++) {
                 System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
 
-                check_all_files(temp_dir_path,N_start,N_end);
+                check_all_files(temp_dir_path,N_start,N_end,stop_words);
 
                 temp_dir_path = temp_dir_path.replace("/neg/","/pos/");
             }
@@ -28,7 +31,7 @@ public class Main {
 
         temp_dir_path = temp_dir_path.replace("/neg/","/unsup/");
         System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
-        check_all_files(temp_dir_path,N_start*4,N_end*4);
+        check_all_files(temp_dir_path,N_start*4,N_end*4,stop_words);
 
 
     }
@@ -57,7 +60,7 @@ public class Main {
         return "Err last path:"+path;
     }
 
-    public static void check_all_files(String temp_dir_path,int N_start,int N_end) throws FileNotFoundException {
+    public static void check_all_files(String temp_dir_path,int N_start,int N_end,LinkedList<String> stop_words) throws FileNotFoundException {
         for (int i = N_start; i < N_end; i++) {
             System.out.print(i + ") ");
             String temp_path = file_with_mark(i,temp_dir_path);
@@ -66,8 +69,9 @@ public class Main {
             while (input.hasNext()) {
                 String word  = input.next();
                 word = stylize(word);
-                if(word.length() == 0){continue;}
-                System.out.print(word + " ");
+                if(word.length() == 0 || stop_words.contains(word)){
+                    continue;}
+                System.out.print("["+word + "] ");
             }
             System.out.println();
         }
@@ -81,5 +85,19 @@ public class Main {
         word = word.toLowerCase();
 
         return word;
+    }
+
+    public static LinkedList<String> read_stop_words(String path) throws FileNotFoundException {
+        File file = new File(path);
+        Scanner input = new Scanner(file);
+        LinkedList<String> stop_words = new LinkedList<>();
+        while (input.hasNext()) {
+            String word  = input.next();
+            System.out.print(word+" ");
+            stop_words.add(word);
+
+        }
+
+        return stop_words;
     }
 }
