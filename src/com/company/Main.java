@@ -1,8 +1,11 @@
 package com.company;
+import sun.plugin.javascript.navig.Link;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.concurrent.*;
 
 public class Main {
 
@@ -11,27 +14,45 @@ public class Main {
         int coef = 10;
         int N_end = ((12500 / 50 * V))/coef;
         int N_start = (12500 / 50 * (V-1))/coef;
-        String dir_path = "F:/Repository/parallel_computing/datasets/aclImdb/test/neg/";
+        String dir_path = "F:/Repository/parallel_computing/datasets/aclImdb/";
 
         LinkedList<String> stop_words = read_stop_words("stop_words.txt");
+        LinkedList<String> dir_source = create_dir_source_list(dir_path);
+        ConcurrentHashMap<String, LinkedList<String>>  my_map = new ConcurrentHashMap<String,  LinkedList<String>>();
 
-        String temp_dir_path = dir_path;
-        for (int j = 0; j < 2; j++) {
-            for (int n = 0; n < 2; n++) {
-                System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
 
-                check_all_files(temp_dir_path,N_start,N_end,stop_words);
 
-                temp_dir_path = temp_dir_path.replace("/neg/","/pos/");
+        for (int j = 0; j <dir_source.size() ; j++) {
+            String temp_dir_path = dir_source.get(j);
+            System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
+
+            for (int i = N_start; i < N_end; i++) {
+                System.out.print(i + ") ");
+                String temp_path = file_with_mark(i,temp_dir_path);
+                File file = new File(temp_path);
+                Scanner input = new Scanner(file);
+                while (input.hasNext()) {
+                    String word  = input.next();
+                    word = stylize(word);
+                    if(word.length() == 0 || stop_words.contains(word)){
+                        continue;}
+                    if(my_map.containsKey(word)){
+                        LinkedList<String> current_list = my_map.get(word);
+                        if(!current_list.contains(temp_path)){
+                            current_list.add(temp_path);
+                        }
+                        else{continue;}
+                    }
+                    else{
+                        LinkedList<String> current_list = new LinkedList<String>();
+                        current_list.add(temp_path);
+                        my_map.put(word,current_list);
+                    }
+                    System.out.print(word + " ");
+                }
+                System.out.println();
             }
-            temp_dir_path = temp_dir_path.replace("/test/","/train/");
-            temp_dir_path = temp_dir_path.replace("/pos/","/neg/");
         }
-
-
-        temp_dir_path = temp_dir_path.replace("/neg/","/unsup/");
-        System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
-        check_all_files(temp_dir_path,N_start*4,N_end*4,stop_words);
 
 
     }
@@ -60,7 +81,9 @@ public class Main {
         return "Err last path:"+path;
     }
 
-    public static void check_all_files(String temp_dir_path,int N_start,int N_end,LinkedList<String> stop_words) throws FileNotFoundException {
+    public static void check_all_files(String temp_dir_path,int N_start,int N_end,LinkedList<String> stop_words,ConcurrentHashMap<String, LinkedList<String>>  my_map) throws FileNotFoundException {
+        System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
+
         for (int i = N_start; i < N_end; i++) {
             System.out.print(i + ") ");
             String temp_path = file_with_mark(i,temp_dir_path);
@@ -71,7 +94,19 @@ public class Main {
                 word = stylize(word);
                 if(word.length() == 0 || stop_words.contains(word)){
                     continue;}
-                System.out.print("["+word + "] ");
+                if(my_map.containsKey(word)){
+                    LinkedList<String> current_list = my_map.get(word);
+                    if(!current_list.contains(temp_path)){
+                        current_list.add(temp_path);
+                    }
+                    else{continue;}
+                }
+                else{
+                    LinkedList<String> current_list = new LinkedList<String>();
+                    current_list.add(temp_path);
+                    my_map.put(word,current_list);
+                }
+                System.out.print(word + " ");
             }
             System.out.println();
         }
@@ -91,13 +126,38 @@ public class Main {
         File file = new File(path);
         Scanner input = new Scanner(file);
         LinkedList<String> stop_words = new LinkedList<>();
+        System.out.println("Stop words:");
         while (input.hasNext()) {
             String word  = input.next();
             System.out.print(word+" ");
             stop_words.add(word);
 
         }
+        System.out.println();
 
         return stop_words;
     }
+
+    public static LinkedList<String> create_dir_source_list(String dir_path){
+        LinkedList<String> dir_source = new LinkedList<String>();
+        dir_path = dir_path.concat("test/neg/");
+        String temp_dir_path = dir_path;
+        for (int j = 0; j < 2; j++) {
+            for (int n = 0; n < 2; n++) {
+//                check_all_files(temp_dir_path,N_start,N_end,stop_words);
+                dir_source.add(temp_dir_path);
+
+                temp_dir_path = temp_dir_path.replace("/neg/","/pos/");
+            }
+            temp_dir_path = temp_dir_path.replace("/test/","/train/");
+            temp_dir_path = temp_dir_path.replace("/pos/","/neg/");
+        }
+
+
+        temp_dir_path = temp_dir_path.replace("/neg/","/unsup/");
+        dir_source.add(temp_dir_path);
+//        check_all_files(temp_dir_path,N_start*4,N_end*4,stop_words);
+        return dir_source;
+    }
+
 }
