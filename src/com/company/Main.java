@@ -54,6 +54,7 @@ public class Main {
             }
         }
 
+        get_files_by_phrase("school",my_map);
 
     }
 
@@ -160,4 +161,18 @@ public class Main {
         return dir_source;
     }
 
+    public static void get_files_by_phrase(String key, ConcurrentHashMap<String, LinkedList<String>> my_map){
+        if(my_map.containsKey(key)){
+            LinkedList<String> current_list = my_map.get(key);
+            System.out.println("\nKey: " + key + " exist at files:");
+            for (int i = 0; i <current_list.size(); i++) {
+                System.out.println(current_list.get(i));
+            }
+        }
+        else{
+
+            System.out.println("\nKey: " + key + " not found:");
+        }
+
+    }
 }
