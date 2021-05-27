@@ -10,7 +10,7 @@ public class Main {
         int coef = 10;
         int N_end = ((12500 / 50 * V))/coef;
         int N_start = (12500 / 50 * (V-1))/coef;
-        String dir_path = "F:/Repository/parallel_computing/course_work_parallel_computing/datasets/aclImdb/test/neg/";
+        String dir_path = "F:/Repository/parallel_computing/datasets/aclImdb/test/neg/";
 
         String temp_dir_path = dir_path;
         for (int j = 0; j < 2; j++) {
@@ -43,14 +43,14 @@ public class Main {
             min_mark = 5;
         }
         String path = "";
-        for(int i = min_mark;i <=max_mark;i++){
+        for(int i = min_mark;i <= max_mark;i++){
 //            System.out.println(i);
             File f1 = null;
             path = dir+String.valueOf(num)+"_"+String.valueOf(i)+".txt";
 //            System.out.println(path);
             f1 = new File(path);
             if(f1.exists()){
-                System.out.print(path + " ");
+//                System.out.print(path + " ");
                 return path;
             }
         }
@@ -65,9 +65,21 @@ public class Main {
             Scanner input = new Scanner(file);
             while (input.hasNext()) {
                 String word  = input.next();
-                System.out.print(word+" ");
+                word = stylize(word);
+                if(word.length() == 0){continue;}
+                System.out.print(word + " ");
             }
             System.out.println();
         }
+    }
+
+    public static String stylize(String word){//,LinkedList<String> punctual_symbol){
+
+        word = word.replaceAll("<br","");
+        //[^A-Za-zА-Яа-я0-9] = only letters and digits
+        word = word.replaceAll("[^A-Za-zА-Яа-я0-9]", ""); // удалится все кроме букв и цифр
+        word = word.toLowerCase();
+
+        return word;
     }
 }
