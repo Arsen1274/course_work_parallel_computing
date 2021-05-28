@@ -7,14 +7,14 @@ import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class Inverted_index  {
-    public ConcurrentHashMap<String, LinkedList<String>> my_map;
-    int NUNMBER_THREADS;
-    int N_end;
-    int N_start;
-    String dir_path;
-    String stop_words_path;
-    LinkedList<String> dir_source;
-    LinkedList<String> stop_words;
+    private ConcurrentHashMap<String, LinkedList<String>> my_map;
+    private int NUNMBER_THREADS;
+    private int N_end;
+    private int N_start;
+    private static String dir_path;
+    private String stop_words_path;
+    private LinkedList<String> dir_source;
+    private LinkedList<String> stop_words;
 
 
     Inverted_index(int NUNMBER_THREADS,int N_start, int N_end, String dir_path, String stop_words_path) throws FileNotFoundException, InterruptedException {
@@ -48,7 +48,7 @@ public class Inverted_index  {
         }
         long stopTime = System.currentTimeMillis();
         this.my_map =my_map;
-        System.out.println("Parrallel algorythm: "+ (stopTime-startTime) + " ms");
+        System.out.println(NUNMBER_THREADS +" threads parrallel algorythm: "+ (stopTime-startTime) + " ms");
     }
 
     public void build_index() throws FileNotFoundException {
@@ -99,7 +99,7 @@ public class Inverted_index  {
 //                System.out.println();
             }
         }
-        System.out.println("Inverted index bild for " + (System.currentTimeMillis() - time) + " ms");
+        System.out.println("Inverted index bild 1 thread for " + (System.currentTimeMillis() - time) + " ms");
         this.my_map = my_map;
     }
 
@@ -136,14 +136,14 @@ public class Inverted_index  {
         return word;
     }
 
-    public static LinkedList<String> read_stop_words(String path) throws FileNotFoundException {
+    private static LinkedList<String> read_stop_words(String path) throws FileNotFoundException {
         File file = new File(path);
         Scanner input = new Scanner(file);
         LinkedList<String> stop_words = new LinkedList<>();
-        System.out.println("Stop words:");
+//        System.out.println("Stop words:");
         while (input.hasNext()) {
             String word = input.next();
-            System.out.print(word + " ");
+//            System.out.print(word + " ");
             stop_words.add(word);
 
         }
@@ -152,7 +152,7 @@ public class Inverted_index  {
         return stop_words;
     }
 
-    public static LinkedList<String> create_dir_source_list(String dir_path) {
+    private static LinkedList<String> create_dir_source_list(String dir_path) {
         LinkedList<String> dir_source = new LinkedList<String>();
         dir_path = dir_path.concat("test/neg/");
         String temp_dir_path = dir_path;
@@ -216,7 +216,7 @@ public class Inverted_index  {
         return result_paths_list;
     }
 
-    public void print_list(LinkedList<String> list, String name) {
+    private void print_list(LinkedList<String> list, String name) {
         String dir_path = this.dir_path;
         System.out.println(name + ":");
         for (int i = 0; i < list.size(); i++) {
@@ -224,5 +224,28 @@ public class Inverted_index  {
         }
     }
 
+    public static String list_to_client_responce(LinkedList<String> list,String client_msg){
+        String result = "Key: "+client_msg+" is at files:\n";
+        for (int i = 0; i < list.size(); i++) {
+            result += (dir_path+list.get(i)+"\n");
+
+        }
+
+        return result;
+    }
+
+//    public void build_with_thread_range(int max_thread,String key) throws FileNotFoundException, InterruptedException {
+//        if(max_thread <= 0){
+//            System.out.println("Err incorrect thread num");
+//        }
+//        build_index();
+//        get_files_by_phrase(key);
+//        for (int i = 0; i < max_thread; i++) {
+//            System.out.print("Thread_num: " + (i +1)+ "  ");
+//            build_index_parallel();
+//            this.NUNMBER_THREADS = this.NUNMBER_THREADS--;
+//            get_files_by_phrase(key);
+//        }
+//    }
 
 }
