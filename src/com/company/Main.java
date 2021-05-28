@@ -138,7 +138,39 @@ public class Main {
         return dir_source;
     }
 
-    
+    public static LinkedList<String> get_files_by_phrase(String key, ConcurrentHashMap<String, LinkedList<String>> my_map,String dir_path){
+        Scanner input = new Scanner(key);
+        LinkedList<String> key_list  = new LinkedList<String>();
+        LinkedList<String> result_paths_list = new LinkedList<String>();
+        while (input.hasNext()){
+            key_list.add(input.next());
+        }
+//        print_list(key_list,"key_list");
+        if(key_list.size() == 1){
+            if(my_map.containsKey(key)){
+                result_paths_list = my_map.get(key);
+                System.out.println("\nWord: " + key + " exist at files:");
+                print_list(result_paths_list,key,dir_path);
+                return result_paths_list;
+            }
+            else{
+                System.out.println("\nKey: " + key + " not found:");
+            }
+        }
+        else if (key_list.size() == 2){
+
+            result_paths_list = my_map.get(key_list.get(0));
+            for (int i = 1; i < key_list.size(); i++) {
+                LinkedList<String> current_list = my_map.get(key_list.get(i));
+                result_paths_list.retainAll(current_list);
+            }
+            System.out.println("\nPhrase: " + key + " exist at files:");
+            print_list(result_paths_list,key,dir_path);
+
+            return result_paths_list;
+        }
+        return result_paths_list;
+    }
 
     public static void print_list(LinkedList<String> list,String name,String dir_path){
         System.out.println(name + ":" );
