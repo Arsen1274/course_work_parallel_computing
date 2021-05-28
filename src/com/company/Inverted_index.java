@@ -48,7 +48,7 @@ public class Inverted_index  {
         }
         long stopTime = System.currentTimeMillis();
         this.my_map =my_map;
-        System.out.println(NUNMBER_THREADS +" threads parrallel algorythm: "+ (stopTime-startTime) + " ms");
+        System.out.println(NUNMBER_THREADS +" threads parrallel algorythm build index in "+ (stopTime-startTime) + " ms");
     }
 
     public void build_index() throws FileNotFoundException {
@@ -130,7 +130,7 @@ public class Inverted_index  {
 
         word = word.replaceAll("<br", "");
         //[^A-Za-zА-Яа-я0-9] = only letters and digits
-        word = word.replaceAll("[^A-Za-zА-Яа-я0-9]", ""); // удалится все кроме букв и цифр
+        word = word.replaceAll("[^A-Za-zА-Яа-я0-9]", "");
         word = word.toLowerCase();
 
         return word;
@@ -174,42 +174,46 @@ public class Inverted_index  {
         return dir_source;
     }
 
-    public LinkedList<String> get_files_by_phrase(String key_input) {
+    public LinkedList<String> get_files_by_phrase(String key) {
         ConcurrentHashMap<String, LinkedList<String>> my_map = this.my_map;
-        String key = key_input.toLowerCase();
         Scanner input = new Scanner(key);
         LinkedList<String> key_list = new LinkedList<String>();
         LinkedList<String> result_paths_list = new LinkedList<String>();
         while (input.hasNext()) {
-            key_list.add(input.next());
+            String input_word = input.next();
+            input_word = stylize(input_word);
+            if (input_word.length() == 0 || this.stop_words.contains(input_word)) {
+                continue;
+            }
+            key_list.add(input_word);
         }
 //        print_list(key_list,"key_list");
         if (key_list.size() == 1) {
-            key = stylize(key);
+//            key = stylize(key);
             if (my_map.containsKey(key)) {
                 result_paths_list = my_map.get(key);
-                System.out.println("\nWord: " + key + " exist at files:");
-                print_list(result_paths_list, key);
+//                System.out.println("\nWord: " + key + " exist at files:");
+//                print_list(result_paths_list, key);
                 return result_paths_list;
             } else {
-                System.out.println("\nKey: " + key + " not found:");
+//                System.out.println("\nKey: " + key + " not found:");
             }
         } else {
             result_paths_list = my_map.get(key_list.get(0));
             if (result_paths_list == null) {
-                System.out.println("Key: " + key + " not found!");
+//                System.out.println("Key: " + key + " not found!");
                 return result_paths_list;
             }
             for (int i = 1; i < key_list.size(); i++) {
                 LinkedList<String> current_list = my_map.get(key_list.get(i));
                 if (current_list == null) {
-                    System.out.println("Key: " + key + " not found!");
+//                    System.out.println("Key: " + key + " not found!");
                     return current_list;
                 }
                 result_paths_list.retainAll(current_list);
             }
-            System.out.println("\nPhrase: " + key + " exist at files:");
-            print_list(result_paths_list, key);
+//            System.out.println("\nPhrase: " + key + " exist at files:");
+//            print_list(result_paths_list, key);
 
             return result_paths_list;
         }
@@ -227,25 +231,12 @@ public class Inverted_index  {
     public static String list_to_client_responce(LinkedList<String> list,String client_msg){
         String result = "Key: "+client_msg+" is at files:\n";
         for (int i = 0; i < list.size(); i++) {
-            result += (dir_path+list.get(i)+"\n");
+            result += (i+") "+dir_path+list.get(i)+"\n");
 
         }
 
         return result;
     }
 
-//    public void build_with_thread_range(int max_thread,String key) throws FileNotFoundException, InterruptedException {
-//        if(max_thread <= 0){
-//            System.out.println("Err incorrect thread num");
-//        }
-//        build_index();
-//        get_files_by_phrase(key);
-//        for (int i = 0; i < max_thread; i++) {
-//            System.out.print("Thread_num: " + (i +1)+ "  ");
-//            build_index_parallel();
-//            this.NUNMBER_THREADS = this.NUNMBER_THREADS--;
-//            get_files_by_phrase(key);
-//        }
-//    }
 
 }

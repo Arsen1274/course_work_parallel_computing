@@ -24,12 +24,13 @@ public class Server_client_thread extends Thread{
             String client_message="", server_message="";
             while(!client_message.equals("bye")){
                 client_message=in_from_client.readUTF();
-                System.out.println("Phrase from Client-" +clientNo+client_message);
+                System.out.println("Phrase from Client-" +clientNo+": "+client_message);
 //                squre = Integer.parseInt(client_message) * Integer.parseInt(client_message);
                 LinkedList<String> server_response_list = index_map.get_files_by_phrase(client_message);
 //                server_message="From Server to Client-" + clientNo + " Square of " + client_message + " is " +squre;
                 server_message = Inverted_index.list_to_client_responce(server_response_list,client_message);
                 out_to_client.writeUTF(server_message);
+                System.out.println("Response to Client-"+clientNo+" on phrase "+client_message+" have send");
                 out_to_client.flush();
             }
             in_from_client.close();

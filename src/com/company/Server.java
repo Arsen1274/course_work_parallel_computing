@@ -15,10 +15,8 @@ public class Server {
         String stop_words_path = "stop_words.txt";
         Inverted_index my_index = new Inverted_index(NUNMBER_THREADS,N_start, N_end, dir_path, stop_words_path);
 
+        System.out.println("Building inverted index...");
         my_index.build_index_parallel();
-//        my_index.build_with_thread_range(4,"excel home videos");
-//        my_index.get_files_by_phrase("excel home videos");
-//        my_index.get_files_by_phrase("dog ");
 
         try{
             ServerSocket server=new ServerSocket(8888);
