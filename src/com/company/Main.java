@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
         int V = 25;
-        int coef = 10;
+        int coef = 1;
         int N_end = ((12500 / 50 * V))/coef;
         int N_start = (12500 / 50 * (V-1))/coef;
         String dir_path = "F:/Repository/parallel_computing/datasets/aclImdb/";
@@ -20,14 +20,17 @@ public class Main {
         LinkedList<String> dir_source = create_dir_source_list(dir_path);
         ConcurrentHashMap<String, LinkedList<String>>  my_map = new ConcurrentHashMap<String,  LinkedList<String>>();
 
-
+        long time = System.currentTimeMillis();
 
         for (int j = 0; j <dir_source.size() ; j++) {
             String temp_dir_path = dir_source.get(j);
-            System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
-
+//            System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
+            if(j ==(dir_source.size() - 1)){
+                N_start = N_start * 4;
+                N_end = N_end * 4;
+            }
             for (int i = N_start; i < N_end; i++) {
-                System.out.print(i + ") ");
+//                System.out.print(i + ") ");
                 String temp_path = file_with_mark(i,temp_dir_path);
                 File file = new File(temp_path);
                 Scanner input = new Scanner(file);
@@ -39,6 +42,7 @@ public class Main {
                     if(my_map.containsKey(word)){
                         LinkedList<String> current_list = my_map.get(word);
                         if(!current_list.contains(temp_path)){
+                            temp_path = temp_path.replace(dir_path,"");
                             current_list.add(temp_path);
                         }
                         else{continue;}
@@ -48,14 +52,16 @@ public class Main {
                         current_list.add(temp_path);
                         my_map.put(word,current_list);
                     }
-                    System.out.print(word + " ");
+//                    System.out.print(word + " ");
                 }
-                System.out.println();
+//                System.out.println();
             }
         }
-
-        get_files_by_phrase("school",my_map);
-
+        System.out.println("Inverted index bild for "+ (System.currentTimeMillis() - time) + " ms");
+        get_files_by_phrase("school",my_map,dir_path);
+        get_files_by_phrase("just gone ",my_map,dir_path);
+//        LinkedList<String> result = get_files_by_phrase("just gone",my_map);
+//        print_list(result,"result");
     }
 
     public static String file_with_mark(int num, String dir){
@@ -82,36 +88,7 @@ public class Main {
         return "Err last path:"+path;
     }
 
-    public static void check_all_files(String temp_dir_path,int N_start,int N_end,LinkedList<String> stop_words,ConcurrentHashMap<String, LinkedList<String>>  my_map) throws FileNotFoundException {
-        System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
 
-        for (int i = N_start; i < N_end; i++) {
-            System.out.print(i + ") ");
-            String temp_path = file_with_mark(i,temp_dir_path);
-            File file = new File(temp_path);
-            Scanner input = new Scanner(file);
-            while (input.hasNext()) {
-                String word  = input.next();
-                word = stylize(word);
-                if(word.length() == 0 || stop_words.contains(word)){
-                    continue;}
-                if(my_map.containsKey(word)){
-                    LinkedList<String> current_list = my_map.get(word);
-                    if(!current_list.contains(temp_path)){
-                        current_list.add(temp_path);
-                    }
-                    else{continue;}
-                }
-                else{
-                    LinkedList<String> current_list = new LinkedList<String>();
-                    current_list.add(temp_path);
-                    my_map.put(word,current_list);
-                }
-                System.out.print(word + " ");
-            }
-            System.out.println();
-        }
-    }
 
     public static String stylize(String word){//,LinkedList<String> punctual_symbol){
 
@@ -161,18 +138,14 @@ public class Main {
         return dir_source;
     }
 
-    public static void get_files_by_phrase(String key, ConcurrentHashMap<String, LinkedList<String>> my_map){
-        if(my_map.containsKey(key)){
-            LinkedList<String> current_list = my_map.get(key);
-            System.out.println("\nKey: " + key + " exist at files:");
-            for (int i = 0; i <current_list.size(); i++) {
-                System.out.println(current_list.get(i));
-            }
-        }
-        else{
+    
 
-            System.out.println("\nKey: " + key + " not found:");
+    public static void print_list(LinkedList<String> list,String name,String dir_path){
+        System.out.println(name + ":" );
+        for (int i = 0; i < list.size() ; i++) {
+            System.out.println(i + ") " +dir_path+ list.get(i));
         }
-
     }
+
+
 }
