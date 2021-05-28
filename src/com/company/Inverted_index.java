@@ -6,18 +6,18 @@ import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.concurrent.*;
 
-public class Inverted_index  {
+public class Inverted_index {
     private ConcurrentHashMap<String, LinkedList<String>> my_map;
     private int NUNMBER_THREADS;
     private int N_end;
     private int N_start;
     private static String dir_path;
     private String stop_words_path;
-    private LinkedList<String> dir_source;
+    private LinkedList<String> dir_sources;
     private LinkedList<String> stop_words;
 
 
-    Inverted_index(int NUNMBER_THREADS,int N_start, int N_end, String dir_path, String stop_words_path) throws FileNotFoundException, InterruptedException {
+    Inverted_index(int NUNMBER_THREADS, int N_start, int N_end, String dir_path, String stop_words_path) throws FileNotFoundException, InterruptedException {
         this.NUNMBER_THREADS = NUNMBER_THREADS;
         this.N_end = N_end;
         this.N_start = N_start;
@@ -33,22 +33,22 @@ public class Inverted_index  {
         String dir_path = this.dir_path;
 
         this.stop_words = read_stop_words(this.stop_words_path);
-        this.dir_source = create_dir_source_list(dir_path);
+        this.dir_sources = create_dir_source_list(dir_path);
         ConcurrentHashMap<String, LinkedList<String>> my_map = new ConcurrentHashMap<String, LinkedList<String>>();
 
 
-        Index_thread TreadArray[] = new Index_thread[this.NUNMBER_THREADS];
+        Index_thread thread_array[] = new Index_thread[this.NUNMBER_THREADS];
         long startTime = System.currentTimeMillis();
-        for(int i = 0; i < this.NUNMBER_THREADS; i++){ //розбиття на потоки
-            TreadArray[i] = new Index_thread(i,NUNMBER_THREADS,N_start, N_end,dir_path, this.dir_source, stop_words,my_map); //тернарна умовна операція
-            TreadArray[i].start();
+        for (int i = 0; i < this.NUNMBER_THREADS; i++) { //розбиття на потоки
+            thread_array[i] = new Index_thread(i, NUNMBER_THREADS, N_start, N_end, dir_path, this.dir_sources, stop_words, my_map);
+            thread_array[i].start();
         }
-        for(int i = 0; i < this.NUNMBER_THREADS; i++){ //очікування завершення усіх потоків
-            TreadArray[i].join();
+        for (int i = 0; i < this.NUNMBER_THREADS; i++) { //очікування завершення усіх потоків
+            thread_array[i].join();
         }
         long stopTime = System.currentTimeMillis();
-        this.my_map =my_map;
-        System.out.println(NUNMBER_THREADS +" threads parrallel algorythm build index in "+ (stopTime-startTime) + " ms");
+        this.my_map = my_map;
+        System.out.println(NUNMBER_THREADS + " threads parrallel algorythm build index in " + (stopTime - startTime) + " ms");
     }
 
     public void build_index() throws FileNotFoundException {
@@ -57,22 +57,22 @@ public class Inverted_index  {
         String dir_path = this.dir_path;
 
         this.stop_words = read_stop_words(this.stop_words_path);
-        this.dir_source = create_dir_source_list(dir_path);
+        this.dir_sources = create_dir_source_list(dir_path);
         ConcurrentHashMap<String, LinkedList<String>> my_map = new ConcurrentHashMap<String, LinkedList<String>>();
 
         long time = System.currentTimeMillis();
 
 
-        for (int j = 0; j < dir_source.size(); j++) {
-            String temp_dir_path = dir_source.get(j);
+        for (int j = 0; j < dir_sources.size(); j++) {
+            String temp_source_path = dir_sources.get(j);
 //            System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
-            if (j == (dir_source.size() - 1)) {
+            if (j == (dir_sources.size() - 1)) {
                 N_start = N_start * 4;
                 N_end = N_end * 4;
             }
             for (int i = N_start; i < N_end; i++) {
 //                System.out.print(i + ") ");
-                String temp_path = file_with_mark(i, temp_dir_path);
+                String temp_path = file_with_mark(i, temp_source_path);
                 File file = new File(temp_path);
                 Scanner input = new Scanner(file);
                 while (input.hasNext()) {
@@ -228,10 +228,10 @@ public class Inverted_index  {
         }
     }
 
-    public static String list_to_client_responce(LinkedList<String> list,String client_msg){
-        String result = "Key: "+client_msg+" is at files:\n";
+    public static String list_to_client_responce(LinkedList<String> list, String client_msg) {
+        String result = "Key: " + client_msg + " is at files:\n";
         for (int i = 0; i < list.size(); i++) {
-            result += (i+") "+dir_path+list.get(i)+"\n");
+            result += (i + ") " + dir_path + list.get(i) + "\n");
 
         }
 
