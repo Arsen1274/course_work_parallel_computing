@@ -4,14 +4,14 @@ import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Index_thread extends Thread {
-    public ConcurrentHashMap<String, LinkedList<String>> my_map;
-    int NUNMBER_THREADS;
-    int N_end;
-    int N_start;
-    int thread_id;
-    String dir_path;
-    LinkedList<String> dir_sources;
-    LinkedList<String> stop_words;
+    private ConcurrentHashMap<String, LinkedList<String>> my_map;
+    private int NUNMBER_THREADS;
+    private int N_end;
+    private int N_start;
+    private int thread_id;
+    private String dir_path;
+    private LinkedList<String> dir_sources;
+    private LinkedList<String> stop_words;
 
 
     Index_thread(int thread_id, int NUNMBER_THREADS, int N_start, int N_end, String dir_path, LinkedList<String> dir_source, LinkedList<String> stop_words, ConcurrentHashMap<String, LinkedList<String>> my_map) {
@@ -29,7 +29,6 @@ public class Index_thread extends Thread {
         int N_end = this.N_end;
         int N_start = this.N_start;
         String dir_path = this.dir_path;
-
 
         for (int j = 0; j < this.dir_sources.size(); j++) {
             String temp_source_path = this.dir_sources.get(j);
@@ -69,22 +68,15 @@ public class Index_thread extends Thread {
                                 current_list.add(temp_path);
                                 my_map.put(word, current_list);
                             }
-
                         }
                         line = reader.readLine();
-
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
             }
         }
-
     }
-
-
 }

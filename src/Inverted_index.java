@@ -15,7 +15,7 @@ public class Inverted_index {
     private LinkedList<String> stop_words;
 
 
-    Inverted_index(int NUNMBER_THREADS, int N_start, int N_end, String dir_path, String stop_words_path) throws FileNotFoundException, InterruptedException {
+    Inverted_index(int NUNMBER_THREADS, int N_start, int N_end, String dir_path, String stop_words_path) {
         this.NUNMBER_THREADS = NUNMBER_THREADS;
         this.N_end = N_end;
         this.N_start = N_start;
@@ -23,8 +23,6 @@ public class Inverted_index {
         this.stop_words_path = stop_words_path;
 
     }
-
-
 
 
     public void build_index_parallel() throws FileNotFoundException, InterruptedException {
@@ -35,7 +33,6 @@ public class Inverted_index {
         this.stop_words = read_stop_words(this.stop_words_path);
         this.dir_sources = create_dir_source_list(dir_path);
         ConcurrentHashMap<String, LinkedList<String>> my_map = new ConcurrentHashMap<String, LinkedList<String>>();
-
 
         Index_thread thread_array[] = new Index_thread[this.NUNMBER_THREADS];
         long startTime = System.currentTimeMillis();
@@ -68,7 +65,7 @@ public class Inverted_index {
                 N_start = N_start * 4;
                 N_end = N_end * 4;
             }
-            for (int i = N_start ; i < N_end; i ++) {
+            for (int i = N_start; i < N_end; i++) {
                 String temp_path = Inverted_index.file_with_mark(i, temp_source_path);
                 File file = new File(temp_path);
                 Scanner input = null;
@@ -104,7 +101,7 @@ public class Inverted_index {
         this.my_map = my_map;
     }
 
-    public static String file_with_mark(int num, String dir) {
+    static String file_with_mark(int num, String dir) {
         int min_mark = 0;
         int max_mark = 10;
         if (dir.contains("/neg/")) {
@@ -114,13 +111,10 @@ public class Inverted_index {
         }
         String path = "";
         for (int i = min_mark; i <= max_mark; i++) {
-//            System.out.println(i);
             File f1 = null;
             path = dir + String.valueOf(num) + "_" + String.valueOf(i) + ".txt";
-//            System.out.println(path);
             f1 = new File(path);
             if (f1.exists()) {
-//                System.out.print(path + " ");
                 return path;
             }
         }
@@ -128,7 +122,6 @@ public class Inverted_index {
     }
 
     public static String stylize(String word) {
-
         word = word.replaceAll("<br", "");
         //[^A-Za-zА-Яа-я0-9] = only letters and digits
         word = word.replaceAll("[^A-Za-zА-Яа-я0-9]", " ");
@@ -138,7 +131,6 @@ public class Inverted_index {
         return word;
     }
 
-
     private static LinkedList<String> read_stop_words(String path) throws FileNotFoundException {
         File file = new File(path);
         Scanner input = new Scanner(file);
@@ -147,7 +139,6 @@ public class Inverted_index {
             String word = input.next();
             stop_words.add(word);
         }
-        System.out.println();
 
         return stop_words;
     }
@@ -159,16 +150,14 @@ public class Inverted_index {
         for (int j = 0; j < 2; j++) {
             for (int n = 0; n < 2; n++) {
                 dir_source.add(temp_dir_path);
-
                 temp_dir_path = temp_dir_path.replace("/neg/", "/pos/");
             }
             temp_dir_path = temp_dir_path.replace("/test/", "/train/");
             temp_dir_path = temp_dir_path.replace("/pos/", "/neg/");
         }
-
-
         temp_dir_path = temp_dir_path.replace("/neg/", "/unsup/");
         dir_source.add(temp_dir_path);
+
         return dir_source;
     }
 
@@ -185,13 +174,13 @@ public class Inverted_index {
             }
             key_list.add(word);
         }
-        if (key_list.size() == 0){
+        if (key_list.size() == 0) {
             return "Your phrase is incorrect. It contains only stop words and/or symbols";
-        }else if (key_list.size() == 1) {
+        } else if (key_list.size() == 1) {
             String temp_key = key_list.get(0);
             if (my_map.containsKey(temp_key)) {
                 result_paths_list = my_map.get(temp_key);
-                return list_to_client_responce(result_paths_list,temp_key);
+                return list_to_client_responce(result_paths_list, temp_key);
             } else {
             }
         } else {
@@ -206,7 +195,7 @@ public class Inverted_index {
                 }
                 result_paths_list.retainAll(current_list);
             }
-            return list_to_client_responce(result_paths_list,key);
+            return list_to_client_responce(result_paths_list, key);
         }
         return "Key: " + key + " not found!";
     }
@@ -215,19 +204,19 @@ public class Inverted_index {
         String dir_path = this.dir_path;
         System.out.println(name + ":");
         for (int i = 0; i < list.size(); i++) {
-            System.out.println(i + ") " + dir_path + list.get(i));
+            System.out.println((i + 1) + ") " + dir_path + list.get(i));
         }
     }
 
-    public static String list_to_client_responce(LinkedList<String> list, String client_msg) {
+    private static String list_to_client_responce(LinkedList<String> list, String client_msg) {
         String result = "Key: " + client_msg + " is at files:\n";
         for (int i = 0; i < list.size(); i++) {
-            result += (i + ") " + dir_path + list.get(i) + "\n");
+            result += ((i + 1) + ") " + dir_path + list.get(i) + "\n");
         }
         return result;
     }
 
-    public ConcurrentHashMap<String, LinkedList<String>> return_map(){
+    public ConcurrentHashMap<String, LinkedList<String>> return_map() {
         return this.my_map;
     }
 

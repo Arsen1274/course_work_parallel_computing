@@ -12,7 +12,6 @@ public class Server_client_thread extends Thread {
         serverClient = inSocket;
         clientNo = counter;
         this.index_map = my_index;
-
     }
 
     public void run() {
@@ -26,7 +25,7 @@ public class Server_client_thread extends Thread {
                 }
                 client_message = in_from_client.readUTF();
                 System.out.println("Phrase from Client-" + clientNo + ": " + client_message);
-                server_message =  index_map.get_files_by_phrase(client_message);
+                server_message = index_map.get_files_by_phrase(client_message);
                 out_to_client.writeUTF(server_message);
                 System.out.println("Response to Client-" + clientNo + " on phrase " + client_message + " have send");
                 out_to_client.flush();
