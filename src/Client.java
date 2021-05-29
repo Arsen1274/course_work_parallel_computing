@@ -1,5 +1,3 @@
-package com.company;
-
 import java.net.*;
 import java.io.*;
 
@@ -12,7 +10,10 @@ public class Client {
             DataOutputStream out_to_server = new DataOutputStream(socket.getOutputStream());
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             String client_message = "", server_message = "";
-            while (!(client_message == "bye")) {
+            while (true) {
+                if (client_message.equals("bye")) {
+                    break;
+                }
                 System.out.println("Enter phrase to search or bye:");
                 client_message = br.readLine();
                 out_to_server.writeUTF(client_message);
