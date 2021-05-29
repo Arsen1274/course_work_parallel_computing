@@ -96,47 +96,10 @@ public class Inverted_index {
                         current_list.add(temp_path);
                         my_map.put(word, current_list);
                     }
-                    //                    System.out.print(word + " ");
                 }
-                //                System.out.println();
             }
         }
-//        for (int j = 0; j < dir_sources.size(); j++) {
-//            String temp_source_path = dir_sources.get(j);
-////            System.out.println("\n------------------------------------------" + temp_dir_path + "------------------------------------------\n" );
-//            if (j == (dir_sources.size() - 1)) {
-//                N_start = N_start * 4;
-//                N_end = N_end * 4;
-//            }
-//            for (int i = N_start; i < N_end; i++) {
-////                System.out.print(i + ") ");
-//                String temp_path = file_with_mark(i, temp_source_path);
-//                File file = new File(temp_path);
-//                Scanner input = new Scanner(file);
-//                while (input.hasNext()) {
-//                    String word = input.next();
-//                    word = stylize(word);
-//                    if (word.length() == 0 || stop_words.contains(word)) {
-//                        continue;
-//                    }
-//                    if (my_map.containsKey(word)) {
-//                        LinkedList<String> current_list = my_map.get(word);
-//                        if (!current_list.contains(temp_path)) {
-//                            temp_path = temp_path.replace(dir_path, "");
-//                            current_list.add(temp_path);
-//                        } else {
-//                            continue;
-//                        }
-//                    } else {
-//                        LinkedList<String> current_list = new LinkedList<String>();
-//                        current_list.add(temp_path);
-//                        my_map.put(word, current_list);
-//                    }
-////                    System.out.print(word + " ");
-//                }
-////                System.out.println();
-//            }
-//        }
+
         System.out.println("Inverted index bild 1 thread for " + (System.currentTimeMillis() - time) + " ms");
         this.my_map = my_map;
     }
@@ -164,7 +127,7 @@ public class Inverted_index {
         return "Err last path:" + path;
     }
 
-    public static String stylize(String word) {//,LinkedList<String> punctual_symbol){
+    public static String stylize(String word) {
 
         word = word.replaceAll("<br", "");
         //[^A-Za-zА-Яа-я0-9] = only letters and digits
@@ -180,12 +143,9 @@ public class Inverted_index {
         File file = new File(path);
         Scanner input = new Scanner(file);
         LinkedList<String> stop_words = new LinkedList<>();
-//        System.out.println("Stop words:");
         while (input.hasNext()) {
             String word = input.next();
-//            System.out.print(word + " ");
             stop_words.add(word);
-
         }
         System.out.println();
 
@@ -198,7 +158,6 @@ public class Inverted_index {
         String temp_dir_path = dir_path;
         for (int j = 0; j < 2; j++) {
             for (int n = 0; n < 2; n++) {
-//                check_all_files(temp_dir_path,N_start,N_end,stop_words);
                 dir_source.add(temp_dir_path);
 
                 temp_dir_path = temp_dir_path.replace("/neg/", "/pos/");
@@ -210,7 +169,6 @@ public class Inverted_index {
 
         temp_dir_path = temp_dir_path.replace("/neg/", "/unsup/");
         dir_source.add(temp_dir_path);
-//        check_all_files(temp_dir_path,N_start*4,N_end*4,stop_words);
         return dir_source;
     }
 
@@ -219,8 +177,6 @@ public class Inverted_index {
         LinkedList<String> key_list = new LinkedList<String>();
         LinkedList<String> result_paths_list = new LinkedList<String>();
 
-
-//        String str = key;
         key = stylize(key);
         String[] words = key.split(" ");
         for (String word : words) {
@@ -233,37 +189,25 @@ public class Inverted_index {
             return "Your phrase is incorrect. It contains only stop words and/or symbols";
         }else if (key_list.size() == 1) {
             String temp_key = key_list.get(0);
-//            key = stylize(key);
             if (my_map.containsKey(temp_key)) {
                 result_paths_list = my_map.get(temp_key);
                 return list_to_client_responce(result_paths_list,temp_key);
-//                return result_paths_list;
             } else {
             }
         } else {
             result_paths_list = my_map.get(key_list.get(0));
             if (result_paths_list == null) {
-//                System.out.println("Key: " + key + " not found!");
                 return "Key: " + key + " not found!";
-//                return result_paths_list;
-
             }
             for (int i = 1; i < key_list.size(); i++) {
                 LinkedList<String> current_list = my_map.get(key_list.get(i));
                 if (current_list == null) {
-//                    System.out.println("Key: " + key + " not found!");
                     return "Key: " + key + " not found!";
-//                    return current_list;
                 }
                 result_paths_list.retainAll(current_list);
             }
-//            System.out.println("\nPhrase: " + key + " exist at files:");
-
-//            print_list(result_paths_list, key);
             return list_to_client_responce(result_paths_list,key);
-//            return result_paths_list;
         }
-//        return result_paths_list;
         return "Key: " + key + " not found!";
     }
 

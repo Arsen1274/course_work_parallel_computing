@@ -1,6 +1,5 @@
 import java.io.*;
 import java.net.*;
-import java.util.LinkedList;
 
 public class Server_client_thread extends Thread {
     Socket serverClient;
@@ -27,8 +26,6 @@ public class Server_client_thread extends Thread {
                 }
                 client_message = in_from_client.readUTF();
                 System.out.println("Phrase from Client-" + clientNo + ": " + client_message);
-//                LinkedList<String> server_response_list = index_map.get_files_by_phrase(client_message);
-//                server_message = Inverted_index.list_to_client_responce(server_response_list, client_message);
                 server_message =  index_map.get_files_by_phrase(client_message);
                 out_to_client.writeUTF(server_message);
                 System.out.println("Response to Client-" + clientNo + " on phrase " + client_message + " have send");
