@@ -1,4 +1,4 @@
 datasets/
 *.iml
 .idea/
-.out/
+out/

@@ -35,18 +35,20 @@ public class InvertedIndex {
 
         IndexThread threadArray[] = new IndexThread[this.NUNMBER_THREADS];
         long startTime = System.currentTimeMillis();
-        for (int i = 0; i < this.NUNMBER_THREADS; i++) { //розбиття на потоки
+        for (int i = 0; i < this.NUNMBER_THREADS; i++) {
+            //розбиття на потоки
             threadArray[i] = new IndexThread(i, NUNMBER_THREADS, N_start, N_end, rootDataPath, inDataPathsList, stopWordsList, indexMap);
+            //запускаємо потік
             threadArray[i].start();
         }
-        for (int i = 0; i < this.NUNMBER_THREADS; i++) { //очікування завершення усіх потоків
+        for (int i = 0; i < this.NUNMBER_THREADS; i++) {
+            //очікування завершення усіх потоків
             threadArray[i].join();
         }
         long stopTime = System.currentTimeMillis();
         this.indexMap = indexMap;
         System.out.println(NUNMBER_THREADS + " threads parrallel algorythm build index in " + (stopTime - startTime) + " ms");
     }
-
 
 
     private static LinkedList<String> readStopWords(String path) throws FileNotFoundException {
@@ -84,10 +86,13 @@ public class InvertedIndex {
         LinkedList<String> userKeysList = new LinkedList<>();
         ConcurrentLinkedQueue<String> resultPathsList = new ConcurrentLinkedQueue<>();
 
+        //стілізуємо надіслану фразу
         userPhrase = stylize(userPhrase);
+        //розбиваємо на слова
         String[] userKeysArr = userPhrase.split(" ");
         for (String userKey : userKeysArr) {
             if (userKey.length() == 0 || this.stopWordsList.contains(userKey)) {
+                //пропускаємо стоп слова та пусті слова
                 continue;
             }
             userKeysList.add(userKey);
@@ -95,24 +100,30 @@ public class InvertedIndex {
         if (userKeysList.size() == 0) {
             return "Your phrase is incorrect. It contains only stop words and/or symbols";
         } else if (userKeysList.size() == 1) {
+
             String tempKey = userKeysList.get(0);
             if (invertedIndexMap.containsKey(tempKey)) {
+                //якщо ключ 1 і він існує повертаємо реузльтат пошуку
                 resultPathsList = invertedIndexMap.get(tempKey);
                 return listToClientResponce(resultPathsList, tempKey);
-            } else {
             }
         } else {
+            //якщо ключів 2 і більше
             resultPathsList = invertedIndexMap.get(userKeysList.get(0));
             if (resultPathsList == null) {
+                //якщо нульовий ключ не знайдено
                 return "Key: " + userPhrase + " not found!";
             }
             for (int i = 1; i < userKeysList.size(); i++) {
                 ConcurrentLinkedQueue<String> currentPathsList = invertedIndexMap.get(userKeysList.get(i));
                 if (currentPathsList == null) {
+                    //якщо один з ключів не знайдено
                     return "Key: " + userPhrase + " not found!";
                 }
+                //залишаємо лише значення які є в двох списках
                 resultPathsList.retainAll(currentPathsList);
             }
+            //перетворюємо список в рядок і надсилаємо користувачу
             return listToClientResponce(resultPathsList, userPhrase);
         }
         return "Key: " + userPhrase + " not found!";
@@ -122,6 +133,7 @@ public class InvertedIndex {
         word = word.replaceAll("<br", "");
         //[^A-Za-zА-Яа-я0-9] = only letters and digits
         word = word.replaceAll("[^A-Za-zА-Яа-я0-9]", " ");
+        //замінюємо поторбвані пробіли на й пробіл
         word = word.replaceAll("\\s+", " ");
         word = word.toLowerCase();
 
