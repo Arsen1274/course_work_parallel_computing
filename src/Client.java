@@ -1,28 +1,31 @@
-import java.net.*;
-import java.io.*;
+import java.net.Socket;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public class Client {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         try {
             Socket socket = new Socket("127.0.0.1", 8888);
-            DataInputStream in_from_server = new DataInputStream(socket.getInputStream());
-            DataOutputStream out_to_server = new DataOutputStream(socket.getOutputStream());
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            String client_message = "", server_message = "";
+            DataInputStream inFromServer = new DataInputStream(socket.getInputStream());
+            DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+            String clientMessage = "", serverMessage = "";
             while (true) {
-                if (client_message.equals("bye")) {
+                System.out.println("Enter phrase to search or '"+ServerClientThread.exitPhrase+"':");
+                clientMessage = bufferedReader.readLine();
+                if (clientMessage.equals(ServerClientThread.exitPhrase)) {
                     break;
                 }
-                System.out.println("Enter phrase to search or bye:");
-                client_message = br.readLine();
-                out_to_server.writeUTF(client_message);
-                out_to_server.flush();
-                server_message = in_from_server.readUTF();
-                System.out.println(server_message);
+                outToServer.writeUTF(clientMessage);
+                outToServer.flush();
+                serverMessage = inFromServer.readUTF();
+                System.out.println(serverMessage);
             }
-            out_to_server.close();
-            out_to_server.close();
+            outToServer.close();
+            outToServer.close();
             socket.close();
         } catch (Exception e) {
             System.out.println(e);

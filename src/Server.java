@@ -1,5 +1,5 @@
 import java.net.ServerSocket;
-import java.net.*;
+import java.net.Socket;
 import java.io.IOException;
 
 public class Server {
@@ -10,22 +10,22 @@ public class Server {
         int N_end = ((12500 / 50 * V)) / coef;
         int N_start = (12500 / 50 * (V - 1)) / coef;
         int NUNMBER_THREADS = 4;
-        String dir_path = "F:/Repository/parallel_computing/datasets/aclImdb/";
-        String stop_words_path = "F:/Repository/parallel_computing/stop_words.txt";
+        String rootDataPath = "F:/Repository/parallel_computing/datasets/aclImdb/";
+        String stopWordsPath = "F:/Repository/parallel_computing/stop_words.txt";
 
-        Inverted_index my_index = new Inverted_index(NUNMBER_THREADS, N_start, N_end, dir_path, stop_words_path);
+        InvertedIndex invertedIndex = new InvertedIndex(NUNMBER_THREADS, N_start, N_end, rootDataPath, stopWordsPath);
         System.out.println("Building inverted index...");
-        my_index.build_index_parallel();
+        invertedIndex.buildIndexParallel();
 
         try {
             ServerSocket server = new ServerSocket(8888);
-            int counter = 0;
+            int clientCounter = 0;
             System.out.println("Server Started ....");
             while (true) {
-                counter++;
+                clientCounter++;
                 Socket serverClient = server.accept();  //server accept the client connection request
-                System.out.println(" >> " + "Client No:" + counter + " started!");
-                Server_client_thread sct = new Server_client_thread(serverClient, counter, my_index); //send  the request to a separate thread
+                System.out.println(" >> " + "Client Num:" + clientCounter + " started!");
+                ServerClientThread sct = new ServerClientThread(serverClient, clientCounter, invertedIndex); //send  the request to a separate thread
                 sct.start();
             }
         } catch (Exception e) {
